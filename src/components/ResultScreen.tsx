@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Reward } from '../types';
+import { Reward, MysteryBox as MysteryBoxType } from '../types';
 import { useGameSound } from '../hooks/useGameSound';
 import { GameEffects } from './GameEffects';
+import { MysteryBox } from './MysteryBox';
 
 const Container = styled(motion.div)`
   max-width: 800px;
@@ -61,6 +62,11 @@ interface Props {
 
 export const ResultScreen: React.FC<Props> = ({ score, reward, onPlayAgain }) => {
   const [showEffect, setShowEffect] = useState<'congratulations' | 'reward' | null>(null);
+  const [mysteryBox, setMysteryBox] = useState<MysteryBoxType>({
+    isOpened: false,
+    reward: null,
+    animation: 'none'
+  });
   const { playCongratulations, playReward } = useGameSound();
 
   useEffect(() => {
@@ -68,15 +74,25 @@ export const ResultScreen: React.FC<Props> = ({ score, reward, onPlayAgain }) =>
     setShowEffect('congratulations');
     playCongratulations();
 
-    // Nếu có phần thưởng, hiển thị hiệu ứng sau 2 giây
+    // Nếu có phần thưởng, bắt đầu hiệu ứng rung hộp quà
     if (reward) {
       const timer = setTimeout(() => {
-        setShowEffect('reward');
-        playReward();
+        setMysteryBox(prev => ({ ...prev, animation: 'shake' }));
       }, 2000);
       return () => clearTimeout(timer);
     }
-  }, [reward, playCongratulations, playReward]);
+  }, [reward, playCongratulations]);
+
+  const handleOpenBox = () => {
+    setMysteryBox(prev => ({
+      ...prev,
+      isOpened: true,
+      animation: 'open',
+      reward
+    }));
+    playReward();
+    setShowEffect('reward');
+  };
 
   return (
     <>
@@ -95,33 +111,23 @@ export const ResultScreen: React.FC<Props> = ({ score, reward, onPlayAgain }) =>
           {score} điểm
         </ScoreDisplay>
 
-        <AnimatePresence>
-          {reward && (
-            <RewardCard
-              initial={{ y: 50, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: -50, opacity: 0 }}
-            >
-              <RewardTitle>🎉 Chúc mừng! Bạn đã nhận được phần thưởng!</RewardTitle>
-              <p>{reward.description}</p>
-              {reward.imageUrl && (
-                <motion.img
-                  src={reward.imageUrl}
-                  alt="Reward"
-                  style={{
-                    width: '100%',
-                    maxWidth: '300px',
-                    borderRadius: '8px',
-                    marginTop: '1rem'
-                  }}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.3 }}
-                />
-              )}
-            </RewardCard>
-          )}
-        </AnimatePresence>
+        {reward && !mysteryBox.isOpened && (
+          <RewardCard
+            initial={{ y: 50, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -50, opacity: 0 }}
+          >
+            <RewardTitle>🎉 Chúc mừng! Bạn có một phần quà bí ẩn!</RewardTitle>
+            <p>Hãy mở hộp quà để xem bạn đã trúng gì nhé!</p>
+          </RewardCard>
+        )}
+
+        {reward && (
+          <MysteryBox
+            mysteryBox={mysteryBox}
+            onOpen={handleOpenBox}
+          />
+        )}
 
         <Button
           whileHover={{ scale: 1.05 }}
