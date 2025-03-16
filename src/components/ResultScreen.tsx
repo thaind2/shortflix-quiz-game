@@ -61,19 +61,22 @@ interface Props {
 
 export const ResultScreen: React.FC<Props> = ({ score, reward, onPlayAgain }) => {
   const [showEffect, setShowEffect] = useState<'congratulations' | 'reward' | null>(null);
+  const { playCongratulations, playReward } = useGameSound();
 
   useEffect(() => {
     // Hiệu ứng chúc mừng khi màn hình kết quả hiển thị
     setShowEffect('congratulations');
+    playCongratulations();
 
     // Nếu có phần thưởng, hiển thị hiệu ứng sau 2 giây
     if (reward) {
       const timer = setTimeout(() => {
         setShowEffect('reward');
+        playReward();
       }, 2000);
       return () => clearTimeout(timer);
     }
-  }, [reward]);
+  }, [reward, playCongratulations, playReward]);
 
   return (
     <>
@@ -101,6 +104,21 @@ export const ResultScreen: React.FC<Props> = ({ score, reward, onPlayAgain }) =>
             >
               <RewardTitle>🎉 Chúc mừng! Bạn đã nhận được phần thưởng!</RewardTitle>
               <p>{reward.description}</p>
+              {reward.imageUrl && (
+                <motion.img
+                  src={reward.imageUrl}
+                  alt="Reward"
+                  style={{
+                    width: '100%',
+                    maxWidth: '300px',
+                    borderRadius: '8px',
+                    marginTop: '1rem'
+                  }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.3 }}
+                />
+              )}
             </RewardCard>
           )}
         </AnimatePresence>
@@ -121,3 +139,5 @@ export const ResultScreen: React.FC<Props> = ({ score, reward, onPlayAgain }) =>
         />
       )}
     </>
+  );
+};
