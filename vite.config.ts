@@ -7,8 +7,20 @@ export default defineConfig({
     outDir: 'dist',
     sourcemap: true,
     minify: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'framer-motion', 'styled-components'],
+        },
+      },
+    },
   },
   server: {
-    port: 3000
+    port: 3000,
+    host: true
+  },
+  base: '/',
+  optimizeDeps: {
+    include: ['react', 'react-dom', 'framer-motion', 'styled-components']
   }
 });
