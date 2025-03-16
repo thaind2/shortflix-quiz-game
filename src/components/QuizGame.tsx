@@ -88,6 +88,7 @@ interface Props {
 
 export const QuizGame: React.FC<Props> = ({ questions, onGameComplete }) => {
   const { gameState, answerQuestion } = useQuizGame(questions);
+  const { playCorrect, playWrong } = useGameSound();
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [isAnswerLocked, setIsAnswerLocked] = useState(false);
   const [showEffect, setShowEffect] = useState<'start' | 'correct' | 'wrong' | 'gameOver' | null>(null);
@@ -110,6 +111,13 @@ export const QuizGame: React.FC<Props> = ({ questions, onGameComplete }) => {
     // Hiển thị hiệu ứng dựa vào kết quả
     const isCorrect = index === currentQuestion.correctAnswer;
     setShowEffect(isCorrect ? 'correct' : 'wrong');
+
+    // Phát âm thanh
+    if (isCorrect) {
+      playCorrect();
+    } else {
+      playWrong();
+    }
 
     // Đợi animation và âm thanh hoàn thành
     await new Promise(resolve => setTimeout(resolve, 1000));
@@ -189,6 +197,12 @@ export const QuizGame: React.FC<Props> = ({ questions, onGameComplete }) => {
                 $isWrong={isAnswerLocked && selectedAnswer === index && index !== currentQuestion.correctAnswer}
                 whileHover={{ scale: isAnswerLocked ? 1 : 1.02 }}
                 whileTap={{ scale: isAnswerLocked ? 1 : 0.98 }}
+              >
+                {option}
+              </OptionButton>
+            ))}
+          </QuestionContainer>
+        </AnimatePresence>
       </Container>
 
       {showEffect && (
