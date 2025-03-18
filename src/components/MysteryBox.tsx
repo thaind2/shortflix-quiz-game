@@ -9,24 +9,41 @@ const Container = styled(motion.div)`
   height: 200px;
   margin: 2rem auto;
   cursor: pointer;
+  perspective: 1000px;
 `;
 
 const Box = styled(motion.div)<{ $isOpened: boolean }>`
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, #ffd700 0%, #ffa500 100%);
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.8s;
+  ${props => props.$isOpened && `
+    transform: rotateY(180deg);
+  `}
+`;
+
+const Face = styled(motion.div)`
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
   border-radius: 20px;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 3rem;
-  transform-origin: bottom;
-  transform-style: preserve-3d;
-  transition: transform 0.5s ease;
-  ${props => props.$isOpened && `
-    transform: rotateX(180deg);
-  `}
+`;
+
+const FrontFace = styled(Face)`
+  background: linear-gradient(135deg, #ffd700 0%, #ffa500 100%);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+`;
+
+const BackFace = styled(Face)`
+  background: white;
+  transform: rotateY(180deg);
+  padding: 1rem;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
 `;
 
 const Lid = styled(motion.div)`
@@ -73,20 +90,13 @@ const Ribbon = styled(motion.div)`
 `;
 
 const RewardContent = styled(motion.div)`
-  position: absolute;
-  top: 0;
-  left: 0;
   width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: white;
-  border-radius: 20px;
-  padding: 1rem;
-  transform: rotateX(180deg);
-  backface-visibility: hidden;
+  text-align: center;
 `;
 
 const RewardImage = styled(motion.img)`
@@ -109,6 +119,21 @@ const RewardValue = styled.p`
   margin: 0;
   text-align: center;
 `;
+
+const getRewardIcon = (type: string) => {
+  switch (type) {
+    case 'LOYALTY_POINTS':
+      return '/images/loyalty-points.png';
+    case 'DATA_PACKAGE':
+      return '/images/data-package.png';
+    case 'DEVICE':
+      return '/images/iphone.png';
+    case 'VEHICLE':
+      return '/images/vinfast.png';
+    default:
+      return '/images/gift.png';
+  }
+};
 
 interface Props {
   mysteryBox: MysteryBoxType;
@@ -143,29 +168,34 @@ export const MysteryBox: React.FC<Props> = ({ mysteryBox, onOpen }) => {
         variants={boxVariants}
         animate={mysteryBox.animation === 'shake' ? 'shake' : 'idle'}
       >
-        {!mysteryBox.isOpened && (
-          <>
-            <Lid />
-            <Ribbon />
-          </>
-        )}
-        {mysteryBox.isOpened && mysteryBox.reward && (
-          <RewardContent>
-            <RewardImage
-              src={mysteryBox.reward.imageUrl}
-              alt={mysteryBox.reward.title}
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.3 }}
-            />
-            <RewardTitle>{mysteryBox.reward.title}</RewardTitle>
-            <RewardValue>
-              {typeof mysteryBox.reward.value === 'number' 
-                ? mysteryBox.reward.value.toLocaleString()
-                : mysteryBox.reward.value}
-            </RewardValue>
-          </RewardContent>
-        )}
+        <FrontFace>
+          {!mysteryBox.isOpened && (
+            <>
+              <Lid />
+              <Ribbon />
+            </>
+          )}
+        </FrontFace>
+        
+        <BackFace>
+          {mysteryBox.isOpened && mysteryBox.reward && (
+            <RewardContent>
+              <RewardImage
+                src={getRewardIcon(mysteryBox.reward.type)}
+                alt={mysteryBox.reward.title}
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.3 }}
+              />
+              <RewardTitle>{mysteryBox.reward.title}</RewardTitle>
+              <RewardValue>
+                {typeof mysteryBox.reward.value === 'number' 
+                  ? mysteryBox.reward.value.toLocaleString()
+                  : mysteryBox.reward.value}
+              </RewardValue>
+            </RewardContent>
+          )}
+        </BackFace>
       </Box>
     </Container>
   );

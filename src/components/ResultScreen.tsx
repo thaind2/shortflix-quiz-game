@@ -68,11 +68,15 @@ export const ResultScreen: React.FC<Props> = ({ score, reward, onPlayAgain }) =>
     animation: 'none'
   });
   const { playCongratulations, playReward } = useGameSound();
+  const [canPlaySound, setCanPlaySound] = useState(true);
 
   useEffect(() => {
     // Hiệu ứng chúc mừng khi màn hình kết quả hiển thị
-    setShowEffect('congratulations');
-    playCongratulations();
+    if (canPlaySound) {
+      setShowEffect('congratulations');
+      playCongratulations();
+      setCanPlaySound(false);
+    }
 
     // Nếu có phần thưởng, bắt đầu hiệu ứng rung hộp quà
     if (reward) {
@@ -81,9 +85,11 @@ export const ResultScreen: React.FC<Props> = ({ score, reward, onPlayAgain }) =>
       }, 2000);
       return () => clearTimeout(timer);
     }
-  }, [reward, playCongratulations]);
+  }, [reward, playCongratulations, canPlaySound]);
 
   const handleOpenBox = () => {
+    if (mysteryBox.isOpened) return;
+    
     setMysteryBox(prev => ({
       ...prev,
       isOpened: true,
