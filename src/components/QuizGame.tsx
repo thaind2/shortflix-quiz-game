@@ -1,84 +1,127 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Question, GameState } from '../types';
 import { useQuizGame } from '../hooks/useQuizGame';
-import { useGameSound } from '../hooks/useGameSound';
+import { Question, GameState } from '../types';
 import { GameEffects } from './GameEffects';
 
 const Container = styled.div`
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 2rem;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border-radius: 15px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-`;
-
-const QuestionContainer = styled(motion.div)`
-  margin-bottom: 2rem;
-`;
-
-const QuestionText = styled.h2`
-  font-size: 1.5rem;
-  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 100vh;
+  padding: 1rem;
+  box-sizing: border-box;
+  background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
   color: #fff;
 `;
 
-const OptionButton = styled(motion.button)<{ $isCorrect?: boolean; $isWrong?: boolean }>`
+const Header = styled.div`
   width: 100%;
-  padding: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+`;
+
+const Score = styled.div`
+  font-size: 1.2rem;
+  font-weight: bold;
+`;
+
+const Timer = styled.div`
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: ${props => props.color || '#fff'};
+`;
+
+const QuestionContainer = styled.div`
+  width: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  max-height: calc(100vh - 180px);
+  overflow-y: auto;
+`;
+
+const QuestionText = styled.h2`
+  font-size: 1.4rem;
+  text-align: center;
+  margin: 0;
+  padding: 0 1rem;
+`;
+
+const QuestionImage = styled(motion.img)`
+  width: 100%;
+  max-width: 300px;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 10px;
   margin: 0.5rem 0;
-  border: none;
-  border-radius: 8px;
-  background: ${props =>
-    props.$isCorrect
-      ? '#4caf50'
-      : props.$isWrong
-      ? '#f44336'
-      : 'rgba(255, 255, 255, 0.1)'};
-  color: white;
+`;
+
+const OptionsContainer = styled.div`
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+  padding: 0 1rem;
+  box-sizing: border-box;
+`;
+
+const Option = styled(motion.button)<{ $isSelected?: boolean; $isCorrect?: boolean; $isWrong?: boolean }>`
+  padding: 1rem;
+  border: 2px solid ${props => {
+    if (props.$isCorrect) return '#4CAF50';
+    if (props.$isWrong) return '#f44336';
+    if (props.$isSelected) return '#2196F3';
+    return 'rgba(255, 255, 255, 0.2)';
+  }};
+  background: ${props => {
+    if (props.$isCorrect) return 'rgba(76, 175, 80, 0.2)';
+    if (props.$isWrong) return 'rgba(244, 67, 54, 0.2)';
+    if (props.$isSelected) return 'rgba(33, 150, 243, 0.2)';
+    return 'rgba(255, 255, 255, 0.1)';
+  }};
+  color: #fff;
+  border-radius: 10px;
   font-size: 1rem;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 60px;
 
-  &:hover:not(:disabled) {
+  &:hover {
     background: rgba(255, 255, 255, 0.2);
   }
 
   &:disabled {
     cursor: not-allowed;
-    opacity: ${props => (props.$isCorrect || props.$isWrong ? 1 : 0.5)};
+    opacity: ${props => (props.$isCorrect || props.$isWrong) ? 1 : 0.5};
   }
 `;
 
-const Score = styled(motion.div)`
-  font-size: 1.5rem;
-  margin-bottom: 1rem;
-  text-align: right;
-`;
-
-const QuestionProgress = styled.div`
-  margin-bottom: 1rem;
-  font-size: 1.2rem;
-  color: rgba(255, 255, 255, 0.8);
-`;
-
-const TimeDisplay = styled.div<{ timeRemaining: number }>`
-  font-size: 1.5rem;
-  text-align: center;
-  margin-bottom: 1rem;
-  color: ${props => (props.timeRemaining <= 5 ? '#ff5252' : 'white')};
-`;
-
-const Timer = styled.div<{ timeRemaining: number }>`
+const Progress = styled.div`
+  width: 100%;
   height: 4px;
-  background: #ff5252;
+  background: rgba(255, 255, 255, 0.1);
   border-radius: 2px;
-  width: ${props => (props.timeRemaining / 30) * 100}%;
-  transition: width 1s linear;
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
+`;
+
+const ProgressBar = styled.div<{ $progress: number }>`
+  width: ${props => props.$progress}%;
+  height: 100%;
+  background: #2196F3;
+  border-radius: 2px;
+  transition: width 0.3s ease;
 `;
 
 interface Props {
@@ -87,132 +130,68 @@ interface Props {
 }
 
 export const QuizGame: React.FC<Props> = ({ questions, onGameComplete }) => {
-  const { gameState, answerQuestion } = useQuizGame(questions);
-  const { playCorrect, playWrong } = useGameSound();
-  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
-  const [isAnswerLocked, setIsAnswerLocked] = useState(false);
-  const [showEffect, setShowEffect] = useState<'start' | 'correct' | 'wrong' | 'gameOver' | null>(null);
-  const [isFirstRender, setIsFirstRender] = useState(true);
-  const currentQuestion = questions[gameState.currentQuestionIndex];
+  const {
+    currentQuestion,
+    selectedAnswer,
+    timeLeft,
+    score,
+    isAnswerRevealed,
+    gameState,
+    handleAnswerClick,
+    isAnswerCorrect,
+    currentQuestionIndex
+  } = useQuizGame(questions, onGameComplete);
 
-  // Hiệu ứng khi bắt đầu game
-  useEffect(() => {
-    if (isFirstRender) {
-      setShowEffect('start');
-      setIsFirstRender(false);
-    }
-  }, [isFirstRender]);
-
-  const handleAnswer = async (index: number) => {
-    if (isAnswerLocked) return;
-    setSelectedAnswer(index);
-    setIsAnswerLocked(true);
-
-    // Hiển thị hiệu ứng dựa vào kết quả
-    const isCorrect = index === currentQuestion.correctAnswer;
-    setShowEffect(isCorrect ? 'correct' : 'wrong');
-
-    // Phát âm thanh
-    if (isCorrect) {
-      playCorrect();
-    } else {
-      playWrong();
-    }
-
-    // Đợi animation và âm thanh hoàn thành
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    answerQuestion(index);
-    setSelectedAnswer(null);
-    setIsAnswerLocked(false);
-    setShowEffect(null);
-  };
-
-  // Kiểm tra kết thúc game
-  useEffect(() => {
-    if (gameState.isGameOver) {
-      setShowEffect('gameOver');
-      setTimeout(() => {
-        onGameComplete(gameState.score, gameState);
-      }, 1500);
-    }
-  }, [gameState.isGameOver, gameState.score, onGameComplete, gameState]);
-
-  if (!currentQuestion || gameState.isGameOver) {
-    return showEffect === 'gameOver' ? <GameEffects type="gameOver" /> : null;
-  }
+  const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
 
   return (
-    <>
-      <Container>
-        <Score
-          initial={{ y: -20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-        >
-          Điểm: {gameState.score}
-        </Score>
-        
-        <QuestionProgress>
-          Câu hỏi {gameState.currentQuestionIndex + 1}/{questions.length}
-        </QuestionProgress>
+    <Container>
+      <GameEffects
+        isPlaying={true}
+        playCorrect={isAnswerRevealed && isAnswerCorrect}
+        playWrong={isAnswerRevealed && !isAnswerCorrect}
+      />
+      
+      <Header>
+        <Score>Điểm: {score}</Score>
+        <Timer color={timeLeft <= 5 ? '#f44336' : undefined}>
+          {timeLeft}s
+        </Timer>
+      </Header>
 
-        <TimeDisplay timeRemaining={gameState.timeRemaining}>
-          {gameState.timeRemaining}s
-        </TimeDisplay>
-        
-        <Timer timeRemaining={gameState.timeRemaining} />
-        
+      <Progress>
+        <ProgressBar $progress={progress} />
+      </Progress>
+
+      <QuestionContainer>
+        <QuestionText>{currentQuestion.text}</QuestionText>
         <AnimatePresence mode="wait">
-          <QuestionContainer
+          <QuestionImage
             key={currentQuestion.id}
-            initial={{ opacity: 0, x: 100 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -100 }}
-          >
-            <QuestionText>{currentQuestion.text}</QuestionText>
-            
-            {currentQuestion.imageUrl && (
-              <motion.img 
-                key={currentQuestion.id}
-                src={currentQuestion.imageUrl} 
-                alt="Question context"
-                style={{ 
-                  width: '100%', 
-                  marginBottom: '1.5rem', 
-                  borderRadius: '8px',
-                  objectFit: 'cover',
-                  height: '300px'
-                }}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.5 }}
-              />
-            )}
-            
-            {currentQuestion.options.map((option, index) => (
-              <OptionButton
-                key={index}
-                onClick={() => handleAnswer(index)}
-                disabled={isAnswerLocked}
-                $isCorrect={isAnswerLocked && index === currentQuestion.correctAnswer}
-                $isWrong={isAnswerLocked && selectedAnswer === index && index !== currentQuestion.correctAnswer}
-                whileHover={{ scale: isAnswerLocked ? 1 : 1.02 }}
-                whileTap={{ scale: isAnswerLocked ? 1 : 0.98 }}
-              >
-                {option}
-              </OptionButton>
-            ))}
-          </QuestionContainer>
+            src={currentQuestion.imageUrl}
+            alt="Question"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            transition={{ duration: 0.3 }}
+          />
         </AnimatePresence>
-      </Container>
-
-      {showEffect && (
-        <GameEffects 
-          type={showEffect} 
-          onComplete={() => setShowEffect(null)}
-        />
-      )}
-    </>
+        <OptionsContainer>
+          {currentQuestion.options.map((option: string, index: number) => (
+            <Option
+              key={index}
+              onClick={() => handleAnswerClick(index)}
+              disabled={isAnswerRevealed || gameState.isGameOver}
+              $isSelected={selectedAnswer === index}
+              $isCorrect={isAnswerRevealed && index === currentQuestion.correctAnswer}
+              $isWrong={isAnswerRevealed && selectedAnswer === index && index !== currentQuestion.correctAnswer}
+              whileTap={{ scale: 0.95 }}
+            >
+              {option}
+            </Option>
+          ))}
+        </OptionsContainer>
+      </QuestionContainer>
+    </Container>
   );
 };

@@ -1,91 +1,105 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { Question, GameState } from '../types';
 
-const INITIAL_TIME = 30;
-const POINTS_PER_CORRECT = 100;
-const TIME_BONUS_MULTIPLIER = 3;
+interface QuizGameHook {
+  currentQuestion: Question;
+  selectedAnswer: number | null;
+  timeLeft: number;
+  score: number;
+  isAnswerRevealed: boolean;
+  gameState: GameState;
+  handleAnswerClick: (index: number) => void;
+  isAnswerCorrect: boolean;
+  currentQuestionIndex: number;
+}
 
-export const useQuizGame = (questions: Question[]) => {
+export const useQuizGame = (questions: Question[], onGameComplete: (score: number, gameState: GameState) => void): QuizGameHook => {
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [score, setScore] = useState(0);
+  const [timeLeft, setTimeLeft] = useState(30);
+  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
+  const [isAnswerRevealed, setIsAnswerRevealed] = useState(false);
+  const [isAnswerCorrect, setIsAnswerCorrect] = useState(false);
   const [gameState, setGameState] = useState<GameState>({
-    score: 0,
-    currentQuestionIndex: 0,
-    timeRemaining: INITIAL_TIME,
     isGameOver: false,
-    wrongAnswers: 0
+    currentQuestionIndex: 0,
+    score: 0,
+    wrongAnswers: 0,
+    timeBonus: 0
   });
 
-  // Reset timer when moving to next question
-  useEffect(() => {
-    setGameState(prev => ({
-      ...prev,
-      timeRemaining: INITIAL_TIME
-    }));
-  }, [gameState.currentQuestionIndex]);
+  const currentQuestion = questions[currentQuestionIndex];
 
-  // Timer countdown
   useEffect(() => {
-    if (gameState.isGameOver) return;
-
-    const timer = setInterval(() => {
-      setGameState(prev => {
-        if (prev.timeRemaining <= 0) {
-          // Time's up, count as wrong answer and move to next question
-          if (prev.currentQuestionIndex < questions.length - 1) {
-            return {
-              ...prev,
-              currentQuestionIndex: prev.currentQuestionIndex + 1,
-              timeRemaining: INITIAL_TIME,
-              wrongAnswers: prev.wrongAnswers + 1
-            };
-          } else {
-            // Game over if no more questions
-            return {
-              ...prev,
-              isGameOver: true,
-              wrongAnswers: prev.wrongAnswers + 1
-            };
+    if (!gameState.isGameOver && !isAnswerRevealed) {
+      const timer = setInterval(() => {
+        setTimeLeft(prev => {
+          if (prev <= 1) {
+            setIsAnswerRevealed(true);
+            setIsAnswerCorrect(false);
+            clearInterval(timer);
+            return 0;
           }
-        }
-        return {
-          ...prev,
-          timeRemaining: prev.timeRemaining - 1
-        };
-      });
-    }, 1000);
+          return prev - 1;
+        });
+      }, 1000);
 
-    return () => clearInterval(timer);
-  }, [gameState.isGameOver, questions.length]);
+      return () => clearInterval(timer);
+    }
+  }, [gameState.isGameOver, isAnswerRevealed]);
 
-  const answerQuestion = useCallback((selectedAnswer: number) => {
-    const currentQuestion = questions[gameState.currentQuestionIndex];
-    const isCorrect = selectedAnswer === currentQuestion.correctAnswer;
+  const handleAnswerClick = (index: number) => {
+    if (isAnswerRevealed) return;
 
-    setGameState(prev => {
-      const newScore = isCorrect
-        ? prev.score + POINTS_PER_CORRECT + (prev.timeRemaining * TIME_BONUS_MULTIPLIER)
-        : prev.score;
+    setSelectedAnswer(index);
+    setIsAnswerRevealed(true);
+    
+    const correct = index === currentQuestion.correctAnswer;
+    setIsAnswerCorrect(correct);
 
-      if (prev.currentQuestionIndex < questions.length - 1) {
-        return {
-          ...prev,
-          score: newScore,
-          currentQuestionIndex: prev.currentQuestionIndex + 1,
-          timeRemaining: INITIAL_TIME,
-          wrongAnswers: isCorrect ? prev.wrongAnswers : prev.wrongAnswers + 1
-        };
-      } else {
-        return {
-          ...prev,
-          score: newScore,
+    if (correct) {
+      const timeBonus = Math.floor(timeLeft / 2);
+      const questionScore = 100 + timeBonus;
+      setScore(prev => prev + questionScore);
+      setGameState(prev => ({
+        ...prev,
+        score: prev.score + questionScore,
+        timeBonus: prev.timeBonus + timeBonus
+      }));
+    } else {
+      setGameState(prev => ({
+        ...prev,
+        wrongAnswers: prev.wrongAnswers + 1
+      }));
+    }
+
+    setTimeout(() => {
+      if (currentQuestionIndex === questions.length - 1) {
+        setGameState(prev => ({ ...prev, isGameOver: true }));
+        onGameComplete(score, {
+          ...gameState,
+          score: score,
           isGameOver: true,
-          wrongAnswers: isCorrect ? prev.wrongAnswers : prev.wrongAnswers + 1
-        };
+          currentQuestionIndex: currentQuestionIndex
+        });
+      } else {
+        setCurrentQuestionIndex(prev => prev + 1);
+        setSelectedAnswer(null);
+        setIsAnswerRevealed(false);
+        setTimeLeft(30);
       }
-    });
-  }, [gameState.currentQuestionIndex, questions]);
+    }, 1500);
+  };
 
   return {
+    currentQuestion,
+    selectedAnswer,
+    timeLeft,
+    score,
+    isAnswerRevealed,
     gameState,
-    answerQuestion
+    handleAnswerClick,
+    isAnswerCorrect,
+    currentQuestionIndex
   };
 };

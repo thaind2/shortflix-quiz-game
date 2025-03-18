@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import confetti from 'canvas-confetti';
 import { motion } from 'framer-motion';
 import styled from 'styled-components';
+import { GameEffectsProps } from '../types';
 
 const EffectOverlay = styled(motion.div)`
   position: fixed;
@@ -12,50 +13,58 @@ const EffectOverlay = styled(motion.div)`
   display: flex;
   align-items: center;
   justify-content: center;
-  pointer-events: none;
   z-index: 1000;
 `;
 
-const Message = styled(motion.div)`
+const EffectText = styled.h2`
   font-size: 3rem;
-  color: white;
+  color: #fff;
   text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 `;
 
-interface Props {
-  type: 'start' | 'correct' | 'wrong' | 'gameOver' | 'reward' | 'congratulations';
-  onComplete?: () => void;
-}
-
-export const GameEffects: React.FC<Props> = ({ type, onComplete }) => {
+export const GameEffects: React.FC<GameEffectsProps> = ({
+  type,
+  onComplete,
+  isPlaying,
+  playCorrect,
+  playWrong
+}) => {
   useEffect(() => {
-    if (['correct', 'gameOver', 'reward', 'congratulations'].includes(type)) {
+    if (type && ['correct', 'gameOver', 'reward', 'congratulations'].includes(type)) {
       const duration = type === 'gameOver' ? 3000 : 1000;
-      const particleCount = type === 'gameOver' ? 200 : 50;
-
-      const colors = type === 'reward' || type === 'congratulations'
-        ? ['#FFD700', '#FFA500', '#FF8C00'] // Gold colors for rewards
-        : ['#26ccff', '#a25afd', '#ff5e7e', '#88ff5a', '#fcff42', '#ffa62d', '#ff36ff'];
-
       confetti({
-        particleCount,
+        particleCount: 100,
         spread: 70,
-        origin: { y: 0.6 },
-        colors,
-        disableForReducedMotion: true
+        origin: { y: 0.6 }
       });
 
       if (onComplete) {
-        setTimeout(onComplete, duration);
+        setTimeout(() => {
+          onComplete();
+        }, duration);
       }
     }
   }, [type, onComplete]);
+
+  useEffect(() => {
+    if (playCorrect) {
+      const audio = new Audio('/correct.mp3');
+      audio.play();
+    }
+  }, [playCorrect]);
+
+  useEffect(() => {
+    if (playWrong) {
+      const audio = new Audio('/wrong.mp3');
+      audio.play();
+    }
+  }, [playWrong]);
 
   const variants = {
     start: {
       scale: [0, 1.2, 1],
       opacity: [0, 1, 0],
-      transition: { duration: 1.5 }
+      transition: { duration: 1 }
     },
     correct: {
       scale: [0, 1.2, 1],
@@ -63,45 +72,45 @@ export const GameEffects: React.FC<Props> = ({ type, onComplete }) => {
       transition: { duration: 1 }
     },
     wrong: {
-      scale: [0, 1.1, 1],
+      scale: [0, 1.2, 1],
       opacity: [0, 1, 0],
       transition: { duration: 1 }
     },
     gameOver: {
       scale: [0, 1.2, 1],
-      opacity: [0, 1, 0],
-      transition: { duration: 2 }
+      opacity: [0, 1, 1],
+      transition: { duration: 1 }
     },
     reward: {
-      scale: [0, 1.3, 1],
+      scale: [0, 1.2, 1],
       opacity: [0, 1, 0],
       transition: { duration: 1.5 }
     },
     congratulations: {
-      scale: [0, 1.4, 1],
+      scale: [0, 1.2, 1],
       opacity: [0, 1, 0],
-      transition: { duration: 2 }
+      transition: { duration: 1.5 }
     }
   };
 
-  const messages = {
+  const effectText: { [key: string]: string } = {
     start: 'Bắt đầu!',
-    correct: 'Đúng!',
-    wrong: 'Sai!',
+    correct: 'Đúng rồi!',
+    wrong: 'Sai rồi!',
     gameOver: 'Kết thúc!',
     reward: 'Phần thưởng!',
     congratulations: 'Chúc mừng!'
   };
 
+  if (!type) return null;
+
   return (
-    <EffectOverlay>
-      <Message
-        initial={{ scale: 0, opacity: 0 }}
-        animate={variants[type]}
-        onAnimationComplete={onComplete}
-      >
-        {messages[type]}
-      </Message>
+    <EffectOverlay
+      initial="hidden"
+      animate={type}
+      variants={variants}
+    >
+      <EffectText>{effectText[type]}</EffectText>
     </EffectOverlay>
   );
 };

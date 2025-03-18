@@ -3,15 +3,7 @@ export interface Question {
   text: string;
   options: string[];
   correctAnswer: number;
-  imageUrl?: string;
-}
-
-export interface GameState {
-  score: number;
-  currentQuestionIndex: number;
-  timeRemaining: number;
-  isGameOver: boolean;
-  wrongAnswers: number;
+  imageUrl: string;
 }
 
 export interface Reward {
@@ -28,4 +20,20 @@ export interface MysteryBox {
   isOpened: boolean;
   reward: Reward | null;
   animation: 'none' | 'shake' | 'open';
+}
+
+export interface GameState {
+  isGameOver: boolean;
+  currentQuestionIndex: number;
+  score: number;
+  wrongAnswers: number;
+  timeBonus: number;
+}
+
+export interface GameEffectsProps {
+  type?: 'start' | 'correct' | 'wrong' | 'gameOver' | 'reward' | 'congratulations';
+  onComplete?: () => void;
+  isPlaying?: boolean;
+  playCorrect?: boolean;
+  playWrong?: boolean;
 }
