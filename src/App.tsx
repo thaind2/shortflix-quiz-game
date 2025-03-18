@@ -2,15 +2,6 @@ import React, { useState } from 'react';
 import { QuizGame } from './components/QuizGame';
 import { ResultScreen } from './components/ResultScreen';
 import { Question, Reward, GameState } from './types';
-import {
-  hanoiImage,
-  vietnamMapImage,
-  phoImage,
-  loyaltyPointsImage,
-  dataPackageImage,
-  iphoneImage,
-  vinfastImage
-} from './assets/images';
 
 // Mock questions data
 const questions: Question[] = [
@@ -19,21 +10,21 @@ const questions: Question[] = [
     text: 'Đâu là thủ đô của Việt Nam?',
     options: ['Hà Nội', 'Hồ Chí Minh', 'Đà Nẵng', 'Huế'],
     correctAnswer: 0,
-    imageUrl: hanoiImage
+    imageUrl: '/images/hanoi.jpg'
   },
   {
     id: '2',
     text: 'Việt Nam có bao nhiêu tỉnh thành?',
     options: ['61', '62', '63', '64'],
     correctAnswer: 2,
-    imageUrl: vietnamMapImage
+    imageUrl: '/images/vietnam-map.jpg'
   },
   {
     id: '3',
     text: 'Đâu là món ăn truyền thống của Việt Nam?',
     options: ['Sushi', 'Pizza', 'Phở', 'Hamburger'],
     correctAnswer: 2,
-    imageUrl: phoImage
+    imageUrl: '/images/pho.jpg'
   }
 ];
 
@@ -45,7 +36,7 @@ const rewards: Reward[] = [
     title: '1,000 Điểm thưởng',
     description: 'Bạn đã nhận được 1,000 điểm thưởng!',
     value: 1000,
-    imageUrl: loyaltyPointsImage,
+    imageUrl: '/images/loyalty-points.png',
     probability: 30
   },
   {
@@ -54,7 +45,7 @@ const rewards: Reward[] = [
     title: '5,000 Điểm thưởng',
     description: 'Bạn đã nhận được 5,000 điểm thưởng!',
     value: 5000,
-    imageUrl: loyaltyPointsImage,
+    imageUrl: '/images/loyalty-points.png',
     probability: 20
   },
   {
@@ -63,7 +54,7 @@ const rewards: Reward[] = [
     title: 'Gói data 1GB',
     description: 'Bạn đã nhận được gói data 1GB!',
     value: '1GB',
-    imageUrl: dataPackageImage,
+    imageUrl: '/images/data-package.png',
     probability: 20
   },
   {
@@ -72,7 +63,7 @@ const rewards: Reward[] = [
     title: 'Gói data 5GB',
     description: 'Bạn đã nhận được gói data 5GB!',
     value: '5GB',
-    imageUrl: dataPackageImage,
+    imageUrl: '/images/data-package.png',
     probability: 15
   },
   {
@@ -81,7 +72,7 @@ const rewards: Reward[] = [
     title: 'iPhone 15',
     description: 'Chúc mừng! Bạn đã trúng iPhone 15!',
     value: 'iPhone 15 128GB',
-    imageUrl: iphoneImage,
+    imageUrl: '/images/iphone.png',
     probability: 10
   },
   {
@@ -90,27 +81,20 @@ const rewards: Reward[] = [
     title: 'VinFast VF8',
     description: 'Chúc mừng! Bạn đã trúng xe VinFast VF8!',
     value: 'VinFast VF8 Eco',
-    imageUrl: vinfastImage,
+    imageUrl: '/images/vinfast.png',
     probability: 5
   }
 ];
 
 const getRandomReward = (): Reward => {
-  // Tính tổng xác suất
   const totalProbability = rewards.reduce((sum, reward) => sum + reward.probability, 0);
-  
-  // Tạo số ngẫu nhiên từ 0 đến tổng xác suất
   let random = Math.random() * totalProbability;
-  
-  // Tìm phần thưởng dựa trên xác suất
   for (const reward of rewards) {
     random -= reward.probability;
     if (random <= 0) {
       return reward;
     }
   }
-  
-  // Trả về phần thưởng đầu tiên nếu có lỗi
   return rewards[0];
 };
 
@@ -127,14 +111,13 @@ const App: React.FC = () => {
     earnedReward: null
   });
 
-  const handleGameComplete = (finalScore: number, gameState: GameState) => {
-    setState(prev => ({
-      ...prev,
-      score: finalScore,
-      // Chỉ trao thưởng khi không có câu trả lời sai nào
-      earnedReward: gameState.wrongAnswers === 0 ? getRandomReward() : null,
-      gameState: 'completed'
-    }));
+  const handleGameComplete = (score: number, gameState: GameState) => {
+    const earnedReward = getRandomReward();
+    setState({
+      gameState: 'completed',
+      score,
+      earnedReward
+    });
   };
 
   const handlePlayAgain = () => {
@@ -148,14 +131,11 @@ const App: React.FC = () => {
   return (
     <div>
       {state.gameState === 'playing' ? (
-        <QuizGame
-          questions={questions}
-          onGameComplete={handleGameComplete}
-        />
+        <QuizGame questions={questions} onGameComplete={handleGameComplete} />
       ) : (
         <ResultScreen
           score={state.score}
-          reward={state.earnedReward}
+          earnedReward={state.earnedReward}
           onPlayAgain={handlePlayAgain}
         />
       )}

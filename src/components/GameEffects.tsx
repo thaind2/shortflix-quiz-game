@@ -65,6 +65,10 @@ export const GameEffects: React.FC<GameEffectsProps> = ({
   }, [playWrong]);
 
   const variants = {
+    hidden: {
+      scale: 0,
+      opacity: 0
+    },
     start: {
       scale: [0, 1.2, 1],
       opacity: [0, 1, 0],

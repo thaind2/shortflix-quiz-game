@@ -176,6 +176,10 @@ export const QuizGame: React.FC<Props> = ({ questions, onGameComplete }) => {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
             transition={{ duration: 0.3 }}
+            onError={(e) => {
+              console.error('Error loading image:', e);
+              e.currentTarget.src = '/images/placeholder.jpg';
+            }}
           />
         </AnimatePresence>
         <OptionsContainer>
