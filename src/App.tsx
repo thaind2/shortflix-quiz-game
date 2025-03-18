@@ -112,10 +112,19 @@ const App: React.FC = () => {
 
   const handleGameComplete = (finalScore: number) => {
     setScore(finalScore);
-    // Nếu trả lời đúng hết các câu hỏi
-    if (finalScore === questions.length * 100) {
+    
+    // Kiểm tra xem người chơi có trả lời đúng hết không
+    // Điểm cơ bản cho mỗi câu hỏi là 100
+    // Điểm thời gian cho mỗi câu là tối đa 30 * 3 = 90
+    // Tổng điểm tối thiểu khi trả lời đúng hết = số câu hỏi * 100
+    const minimumPerfectScore = questions.length * 100;
+    
+    // Nếu điểm số >= điểm tối thiểu khi trả lời đúng hết
+    // nghĩa là người chơi đã trả lời đúng tất cả các câu hỏi
+    if (finalScore >= minimumPerfectScore) {
       setEarnedReward(getRandomReward());
     }
+    
     setGameState('completed');
   };
 
