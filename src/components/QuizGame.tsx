@@ -173,6 +173,7 @@ export const QuizGame: React.FC<Props> = ({ questions, onGameComplete }) => {
             
             {currentQuestion.imageUrl && (
               <motion.img 
+                key={currentQuestion.id}
                 src={currentQuestion.imageUrl} 
                 alt="Question context"
                 style={{ 
@@ -180,11 +181,12 @@ export const QuizGame: React.FC<Props> = ({ questions, onGameComplete }) => {
                   marginBottom: '1.5rem', 
                   borderRadius: '8px',
                   objectFit: 'cover',
-                  maxHeight: '300px'
+                  height: '300px'
                 }}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.3 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.5 }}
               />
             )}
             

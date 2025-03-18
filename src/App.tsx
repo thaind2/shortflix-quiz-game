@@ -10,21 +10,21 @@ const questions: Question[] = [
     text: 'Đâu là thủ đô của Việt Nam?',
     options: ['Hà Nội', 'Hồ Chí Minh', 'Đà Nẵng', 'Huế'],
     correctAnswer: 0,
-    imageUrl: 'https://picsum.photos/800/400'
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Hanoi_Skyline_2020.jpg/1200px-Hanoi_Skyline_2020.jpg'
   },
   {
     id: '2',
     text: 'Việt Nam có bao nhiêu tỉnh thành?',
     options: ['61', '62', '63', '64'],
     correctAnswer: 2,
-    imageUrl: 'https://picsum.photos/800/400'
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Vietnam_location_map.svg/1200px-Vietnam_location_map.svg.png'
   },
   {
     id: '3',
     text: 'Đâu là món ăn truyền thống của Việt Nam?',
     options: ['Sushi', 'Pizza', 'Phở', 'Hamburger'],
     correctAnswer: 2,
-    imageUrl: 'https://picsum.photos/800/400'
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Pho-Beef-Noodles-2008.jpg/1200px-Pho-Beef-Noodles-2008.jpg'
   }
 ];
 
