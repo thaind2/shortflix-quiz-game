@@ -93,7 +93,8 @@ export const QuizGame: React.FC<Props> = ({ questions, onGameComplete }) => {
   const [isAnswerLocked, setIsAnswerLocked] = useState(false);
   const [showEffect, setShowEffect] = useState<'start' | 'correct' | 'wrong' | 'gameOver' | null>(null);
   const [isFirstRender, setIsFirstRender] = useState(true);
-  const currentQuestion = questions[gameState.currentQuestion];
+  const currentQuestionIndex = gameState.currentQuestionIndex;
+  const currentQuestion = questions[currentQuestionIndex];
 
   // Hiệu ứng khi bắt đầu game
   useEffect(() => {
@@ -153,7 +154,7 @@ export const QuizGame: React.FC<Props> = ({ questions, onGameComplete }) => {
         </Score>
         
         <QuestionProgress>
-          Câu hỏi {gameState.currentQuestion + 1}/{questions.length}
+          Câu hỏi {currentQuestionIndex + 1}/{questions.length}
         </QuestionProgress>
 
         <TimeDisplay timeRemaining={gameState.timeRemaining}>
@@ -207,7 +208,7 @@ export const QuizGame: React.FC<Props> = ({ questions, onGameComplete }) => {
 
       {showEffect && (
         <GameEffects 
-          type={showEffect}
+          type={showEffect} 
           onComplete={() => setShowEffect(null)}
         />
       )}

@@ -8,7 +8,7 @@ const TIME_BONUS_MULTIPLIER = 3;
 export const useQuizGame = (questions: Question[]) => {
   const [gameState, setGameState] = useState<GameState>({
     score: 0,
-    currentQuestion: 0,
+    currentQuestionIndex: 0,
     timeRemaining: INITIAL_TIME,
     isGameOver: false
   });
@@ -19,7 +19,7 @@ export const useQuizGame = (questions: Question[]) => {
       ...prev,
       timeRemaining: INITIAL_TIME
     }));
-  }, [gameState.currentQuestion]);
+  }, [gameState.currentQuestionIndex]);
 
   // Timer countdown
   useEffect(() => {
@@ -29,10 +29,10 @@ export const useQuizGame = (questions: Question[]) => {
       setGameState(prev => {
         if (prev.timeRemaining <= 0) {
           // Time's up, move to next question
-          if (prev.currentQuestion < questions.length - 1) {
+          if (prev.currentQuestionIndex < questions.length - 1) {
             return {
               ...prev,
-              currentQuestion: prev.currentQuestion + 1,
+              currentQuestionIndex: prev.currentQuestionIndex + 1,
               timeRemaining: INITIAL_TIME
             };
           } else {
@@ -54,7 +54,7 @@ export const useQuizGame = (questions: Question[]) => {
   }, [gameState.isGameOver, questions.length]);
 
   const answerQuestion = useCallback((selectedAnswer: number) => {
-    const currentQuestion = questions[gameState.currentQuestion];
+    const currentQuestion = questions[gameState.currentQuestionIndex];
     const isCorrect = selectedAnswer === currentQuestion.correctAnswer;
 
     setGameState(prev => {
@@ -62,11 +62,11 @@ export const useQuizGame = (questions: Question[]) => {
         ? prev.score + POINTS_PER_CORRECT + (prev.timeRemaining * TIME_BONUS_MULTIPLIER)
         : prev.score;
 
-      if (prev.currentQuestion < questions.length - 1) {
+      if (prev.currentQuestionIndex < questions.length - 1) {
         return {
           ...prev,
           score: newScore,
-          currentQuestion: prev.currentQuestion + 1,
+          currentQuestionIndex: prev.currentQuestionIndex + 1,
           timeRemaining: INITIAL_TIME
         };
       } else {
@@ -77,7 +77,7 @@ export const useQuizGame = (questions: Question[]) => {
         };
       }
     });
-  }, [gameState.currentQuestion, questions]);
+  }, [gameState.currentQuestionIndex, questions]);
 
   return {
     gameState,
