@@ -2,6 +2,13 @@ import React from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { MysteryBox as MysteryBoxType, Reward } from '../types';
+import {
+  giftImage,
+  loyaltyPointsImage,
+  dataPackageImage,
+  iphoneImage,
+  vinfastImage
+} from '../assets/images';
 
 const Container = styled.div`
   position: relative;
@@ -139,15 +146,15 @@ export const MysteryBox: React.FC<Props> = ({ mysteryBox, onOpen }) => {
   const getRewardImage = (reward: Reward) => {
     switch (reward.type) {
       case 'LOYALTY_POINTS':
-        return '/images/loyalty-points.png';
+        return loyaltyPointsImage;
       case 'DATA_PACKAGE':
-        return '/images/data-package.png';
+        return dataPackageImage;
       case 'DEVICE':
-        return '/images/iphone.png';
+        return iphoneImage;
       case 'VEHICLE':
-        return '/images/vinfast.png';
+        return vinfastImage;
       default:
-        return '/images/gift.png';
+        return giftImage;
     }
   };
 

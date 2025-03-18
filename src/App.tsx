@@ -2,6 +2,15 @@ import React, { useState } from 'react';
 import { QuizGame } from './components/QuizGame';
 import { ResultScreen } from './components/ResultScreen';
 import { Question, Reward, GameState } from './types';
+import {
+  hanoiImage,
+  vietnamMapImage,
+  phoImage,
+  loyaltyPointsImage,
+  dataPackageImage,
+  iphoneImage,
+  vinfastImage
+} from './assets/images';
 
 // Mock questions data
 const questions: Question[] = [
@@ -10,21 +19,21 @@ const questions: Question[] = [
     text: 'Đâu là thủ đô của Việt Nam?',
     options: ['Hà Nội', 'Hồ Chí Minh', 'Đà Nẵng', 'Huế'],
     correctAnswer: 0,
-    imageUrl: '/images/questions/hanoi.jpg'
+    imageUrl: hanoiImage
   },
   {
     id: '2',
     text: 'Việt Nam có bao nhiêu tỉnh thành?',
     options: ['61', '62', '63', '64'],
     correctAnswer: 2,
-    imageUrl: '/images/questions/vietnam-map.jpg'
+    imageUrl: vietnamMapImage
   },
   {
     id: '3',
     text: 'Đâu là món ăn truyền thống của Việt Nam?',
     options: ['Sushi', 'Pizza', 'Phở', 'Hamburger'],
     correctAnswer: 2,
-    imageUrl: '/images/questions/pho.jpg'
+    imageUrl: phoImage
   }
 ];
 
@@ -36,7 +45,7 @@ const rewards: Reward[] = [
     title: '1,000 Điểm thưởng',
     description: 'Bạn đã nhận được 1,000 điểm thưởng!',
     value: 1000,
-    imageUrl: '/images/loyalty-points.png',
+    imageUrl: loyaltyPointsImage,
     probability: 30
   },
   {
@@ -45,7 +54,7 @@ const rewards: Reward[] = [
     title: '5,000 Điểm thưởng',
     description: 'Bạn đã nhận được 5,000 điểm thưởng!',
     value: 5000,
-    imageUrl: '/images/loyalty-points.png',
+    imageUrl: loyaltyPointsImage,
     probability: 20
   },
   {
@@ -54,7 +63,7 @@ const rewards: Reward[] = [
     title: 'Gói data 1GB',
     description: 'Bạn đã nhận được gói data 1GB!',
     value: '1GB',
-    imageUrl: '/images/data-package.png',
+    imageUrl: dataPackageImage,
     probability: 20
   },
   {
@@ -63,7 +72,7 @@ const rewards: Reward[] = [
     title: 'Gói data 5GB',
     description: 'Bạn đã nhận được gói data 5GB!',
     value: '5GB',
-    imageUrl: '/images/data-package.png',
+    imageUrl: dataPackageImage,
     probability: 15
   },
   {
@@ -72,7 +81,7 @@ const rewards: Reward[] = [
     title: 'iPhone 15',
     description: 'Chúc mừng! Bạn đã trúng iPhone 15!',
     value: 'iPhone 15 128GB',
-    imageUrl: '/images/iphone.png',
+    imageUrl: iphoneImage,
     probability: 10
   },
   {
@@ -81,7 +90,7 @@ const rewards: Reward[] = [
     title: 'VinFast VF8',
     description: 'Chúc mừng! Bạn đã trúng xe VinFast VF8!',
     value: 'VinFast VF8 Eco',
-    imageUrl: '/images/vinfast.png',
+    imageUrl: vinfastImage,
     probability: 5
   }
 ];
