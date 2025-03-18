@@ -7,10 +7,11 @@ export interface Question {
 }
 
 export interface GameState {
-  currentQuestionIndex: number;
   score: number;
+  currentQuestionIndex: number;
   timeRemaining: number;
   isGameOver: boolean;
+  wrongAnswers: number;
 }
 
 export interface Reward {
@@ -18,13 +19,13 @@ export interface Reward {
   type: 'LOYALTY_POINTS' | 'DATA_PACKAGE' | 'DEVICE' | 'VEHICLE';
   title: string;
   description: string;
-  value: string | number;
+  value: number | string;
   imageUrl: string;
-  probability: number; // Xác suất trúng phần thưởng (0-100)
+  probability: number;
 }
 
 export interface MysteryBox {
   isOpened: boolean;
   reward: Reward | null;
-  animation: 'shake' | 'open' | 'none';
+  animation: 'none' | 'shake' | 'open';
 }

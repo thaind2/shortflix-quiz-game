@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Question } from '../types';
+import { Question, GameState } from '../types';
 import { useQuizGame } from '../hooks/useQuizGame';
 import { useGameSound } from '../hooks/useGameSound';
 import { GameEffects } from './GameEffects';
@@ -83,7 +83,7 @@ const Timer = styled.div<{ timeRemaining: number }>`
 
 interface Props {
   questions: Question[];
-  onGameComplete: (score: number) => void;
+  onGameComplete: (score: number, gameState: GameState) => void;
 }
 
 export const QuizGame: React.FC<Props> = ({ questions, onGameComplete }) => {
@@ -93,8 +93,7 @@ export const QuizGame: React.FC<Props> = ({ questions, onGameComplete }) => {
   const [isAnswerLocked, setIsAnswerLocked] = useState(false);
   const [showEffect, setShowEffect] = useState<'start' | 'correct' | 'wrong' | 'gameOver' | null>(null);
   const [isFirstRender, setIsFirstRender] = useState(true);
-  const currentQuestionIndex = gameState.currentQuestionIndex;
-  const currentQuestion = questions[currentQuestionIndex];
+  const currentQuestion = questions[gameState.currentQuestionIndex];
 
   // Hiệu ứng khi bắt đầu game
   useEffect(() => {
@@ -134,10 +133,10 @@ export const QuizGame: React.FC<Props> = ({ questions, onGameComplete }) => {
     if (gameState.isGameOver) {
       setShowEffect('gameOver');
       setTimeout(() => {
-        onGameComplete(gameState.score);
+        onGameComplete(gameState.score, gameState);
       }, 1500);
     }
-  }, [gameState.isGameOver, gameState.score, onGameComplete]);
+  }, [gameState.isGameOver, gameState.score, onGameComplete, gameState]);
 
   if (!currentQuestion || gameState.isGameOver) {
     return showEffect === 'gameOver' ? <GameEffects type="gameOver" /> : null;
@@ -154,7 +153,7 @@ export const QuizGame: React.FC<Props> = ({ questions, onGameComplete }) => {
         </Score>
         
         <QuestionProgress>
-          Câu hỏi {currentQuestionIndex + 1}/{questions.length}
+          Câu hỏi {gameState.currentQuestionIndex + 1}/{questions.length}
         </QuestionProgress>
 
         <TimeDisplay timeRemaining={gameState.timeRemaining}>

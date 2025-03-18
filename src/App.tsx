@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { QuizGame } from './components/QuizGame';
 import { ResultScreen } from './components/ResultScreen';
-import { Question, Reward } from './types';
+import { Question, Reward, GameState } from './types';
 
 // Mock questions data
 const questions: Question[] = [
@@ -105,46 +105,48 @@ const getRandomReward = (): Reward => {
   return rewards[0];
 };
 
-const App: React.FC = () => {
-  const [gameState, setGameState] = useState<'playing' | 'completed'>('playing');
-  const [score, setScore] = useState(0);
-  const [earnedReward, setEarnedReward] = useState<Reward | null>(null);
+interface AppState {
+  gameState: 'playing' | 'completed';
+  score: number;
+  earnedReward: Reward | null;
+}
 
-  const handleGameComplete = (finalScore: number) => {
-    setScore(finalScore);
-    
-    // Kiểm tra xem người chơi có trả lời đúng hết không
-    // Điểm cơ bản cho mỗi câu hỏi là 100
-    // Điểm thời gian cho mỗi câu là tối đa 30 * 3 = 90
-    // Tổng điểm tối thiểu khi trả lời đúng hết = số câu hỏi * 100
-    const minimumPerfectScore = questions.length * 100;
-    
-    // Nếu điểm số >= điểm tối thiểu khi trả lời đúng hết
-    // nghĩa là người chơi đã trả lời đúng tất cả các câu hỏi
-    if (finalScore >= minimumPerfectScore) {
-      setEarnedReward(getRandomReward());
-    }
-    
-    setGameState('completed');
+const App: React.FC = () => {
+  const [state, setState] = useState<AppState>({
+    gameState: 'playing',
+    score: 0,
+    earnedReward: null
+  });
+
+  const handleGameComplete = (finalScore: number, gameState: GameState) => {
+    setState(prev => ({
+      ...prev,
+      score: finalScore,
+      // Chỉ trao thưởng khi không có câu trả lời sai nào
+      earnedReward: gameState.wrongAnswers === 0 ? getRandomReward() : null,
+      gameState: 'completed'
+    }));
   };
 
   const handlePlayAgain = () => {
-    setScore(0);
-    setEarnedReward(null);
-    setGameState('playing');
+    setState({
+      gameState: 'playing',
+      score: 0,
+      earnedReward: null
+    });
   };
 
   return (
     <div>
-      {gameState === 'playing' ? (
+      {state.gameState === 'playing' ? (
         <QuizGame
           questions={questions}
           onGameComplete={handleGameComplete}
         />
       ) : (
         <ResultScreen
-          score={score}
-          reward={earnedReward}
+          score={state.score}
+          reward={state.earnedReward}
           onPlayAgain={handlePlayAgain}
         />
       )}

@@ -10,7 +10,8 @@ export const useQuizGame = (questions: Question[]) => {
     score: 0,
     currentQuestionIndex: 0,
     timeRemaining: INITIAL_TIME,
-    isGameOver: false
+    isGameOver: false,
+    wrongAnswers: 0
   });
 
   // Reset timer when moving to next question
@@ -28,18 +29,20 @@ export const useQuizGame = (questions: Question[]) => {
     const timer = setInterval(() => {
       setGameState(prev => {
         if (prev.timeRemaining <= 0) {
-          // Time's up, move to next question
+          // Time's up, count as wrong answer and move to next question
           if (prev.currentQuestionIndex < questions.length - 1) {
             return {
               ...prev,
               currentQuestionIndex: prev.currentQuestionIndex + 1,
-              timeRemaining: INITIAL_TIME
+              timeRemaining: INITIAL_TIME,
+              wrongAnswers: prev.wrongAnswers + 1
             };
           } else {
             // Game over if no more questions
             return {
               ...prev,
-              isGameOver: true
+              isGameOver: true,
+              wrongAnswers: prev.wrongAnswers + 1
             };
           }
         }
@@ -67,13 +70,15 @@ export const useQuizGame = (questions: Question[]) => {
           ...prev,
           score: newScore,
           currentQuestionIndex: prev.currentQuestionIndex + 1,
-          timeRemaining: INITIAL_TIME
+          timeRemaining: INITIAL_TIME,
+          wrongAnswers: isCorrect ? prev.wrongAnswers : prev.wrongAnswers + 1
         };
       } else {
         return {
           ...prev,
           score: newScore,
-          isGameOver: true
+          isGameOver: true,
+          wrongAnswers: isCorrect ? prev.wrongAnswers : prev.wrongAnswers + 1
         };
       }
     });
