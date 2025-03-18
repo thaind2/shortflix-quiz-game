@@ -147,6 +147,8 @@ export const QuizGame: React.FC<Props> = ({ questions, onGameComplete }) => {
   return (
     <Container>
       <GameEffects
+        type={isAnswerRevealed ? (isAnswerCorrect ? 'correct' : 'wrong') : undefined}
+        onComplete={() => {}}
         isPlaying={true}
         playCorrect={isAnswerRevealed && isAnswerCorrect}
         playWrong={isAnswerRevealed && !isAnswerCorrect}

@@ -48,15 +48,19 @@ export const GameEffects: React.FC<GameEffectsProps> = ({
 
   useEffect(() => {
     if (playCorrect) {
-      const audio = new Audio('/correct.mp3');
-      audio.play();
+      const audio = new Audio('/sounds/correct.mp3');
+      audio.play().catch(error => {
+        console.error('Error playing correct sound:', error);
+      });
     }
   }, [playCorrect]);
 
   useEffect(() => {
     if (playWrong) {
-      const audio = new Audio('/wrong.mp3');
-      audio.play();
+      const audio = new Audio('/sounds/wrong.mp3');
+      audio.play().catch(error => {
+        console.error('Error playing wrong sound:', error);
+      });
     }
   }, [playWrong]);
 
