@@ -36,38 +36,82 @@ const Face = styled.div<{ $isBack?: boolean }>`
   transform: ${props => props.$isBack ? 'rotateY(180deg)' : 'rotateY(0)'};
 `;
 
-const GiftImage = styled.img`
+const GiftBox = styled.div`
+  width: 100%;
+  height: 100%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const GiftBoxTop = styled.div`
   width: 80%;
   height: 80%;
-  object-fit: contain;
+  background: linear-gradient(135deg, #ff4b4b 0%, #ff0000 100%);
+  border-radius: 10px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: 10px;
+    background: #ffeb3b;
+    transform: translateY(-50%);
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 10px;
+    height: 100%;
+    background: #ffeb3b;
+    transform: translateX(-50%);
+  }
+`;
+
+const RewardContainer = styled.div`
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  text-align: center;
 `;
 
 const RewardImage = styled.img`
-  width: 60%;
-  height: 60%;
+  width: 60px;
+  height: 60px;
   object-fit: contain;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
 `;
 
 const RewardTitle = styled.h3`
   font-size: 1.2rem;
   color: #fff;
   margin: 0;
-  text-align: center;
 `;
 
 const RewardValue = styled.p`
   font-size: 1rem;
   color: rgba(255, 255, 255, 0.8);
-  margin: 0.5rem 0;
-  text-align: center;
+  margin: 0;
 `;
 
 const RewardDescription = styled.p`
   font-size: 0.9rem;
   color: rgba(255, 255, 255, 0.7);
   margin: 0;
-  text-align: center;
 `;
 
 interface Props {
@@ -88,12 +132,6 @@ export const MysteryBox: React.FC<Props> = ({ mysteryBox, onOpen }) => {
       transition: {
         duration: 0.5,
         repeat: Infinity
-      }
-    },
-    open: {
-      rotateY: 180,
-      transition: {
-        duration: 0.8
       }
     }
   };
@@ -123,16 +161,18 @@ export const MysteryBox: React.FC<Props> = ({ mysteryBox, onOpen }) => {
   return (
     <Container onClick={handleClick}>
       <Box
-        animate={mysteryBox.animation}
+        animate={mysteryBox.animation === 'shake' ? 'shake' : undefined}
         variants={boxVariants}
         style={{ transform: mysteryBox.isOpened ? 'rotateY(180deg)' : 'rotateY(0)' }}
       >
         <Face>
-          <GiftImage src="/images/gift.png" alt="Mystery Box" />
+          <GiftBox>
+            <GiftBoxTop />
+          </GiftBox>
         </Face>
         <Face $isBack>
           {mysteryBox.reward && (
-            <>
+            <RewardContainer>
               <RewardImage
                 src={getRewardImage(mysteryBox.reward)}
                 alt={mysteryBox.reward.title}
@@ -140,7 +180,7 @@ export const MysteryBox: React.FC<Props> = ({ mysteryBox, onOpen }) => {
               <RewardTitle>{mysteryBox.reward.title}</RewardTitle>
               <RewardValue>{formatValue(mysteryBox.reward)}</RewardValue>
               <RewardDescription>{mysteryBox.reward.description}</RewardDescription>
-            </>
+            </RewardContainer>
           )}
         </Face>
       </Box>
