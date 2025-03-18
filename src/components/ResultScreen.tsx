@@ -56,11 +56,11 @@ const Button = styled(motion.button)`
 
 interface Props {
   score: number;
-  reward: Reward | null;
+  earnedReward: Reward | null;
   onPlayAgain: () => void;
 }
 
-export const ResultScreen: React.FC<Props> = ({ score, reward, onPlayAgain }) => {
+export const ResultScreen: React.FC<Props> = ({ score, earnedReward, onPlayAgain }) => {
   const [showEffect, setShowEffect] = useState<'congratulations' | 'reward' | null>(null);
   const [mysteryBox, setMysteryBox] = useState<MysteryBoxType>({
     isOpened: false,
@@ -79,13 +79,13 @@ export const ResultScreen: React.FC<Props> = ({ score, reward, onPlayAgain }) =>
     }
 
     // Nếu có phần thưởng, bắt đầu hiệu ứng rung hộp quà
-    if (reward) {
+    if (earnedReward) {
       const timer = setTimeout(() => {
         setMysteryBox(prev => ({ ...prev, animation: 'shake' }));
       }, 2000);
       return () => clearTimeout(timer);
     }
-  }, [reward, playCongratulations, canPlaySound]);
+  }, [earnedReward, playCongratulations, canPlaySound]);
 
   const handleOpenBox = () => {
     if (mysteryBox.isOpened) return;
@@ -94,7 +94,7 @@ export const ResultScreen: React.FC<Props> = ({ score, reward, onPlayAgain }) =>
       ...prev,
       isOpened: true,
       animation: 'open',
-      reward
+      reward: earnedReward
     }));
     playReward();
     setShowEffect('reward');
@@ -117,7 +117,7 @@ export const ResultScreen: React.FC<Props> = ({ score, reward, onPlayAgain }) =>
           {score} điểm
         </ScoreDisplay>
 
-        {reward && !mysteryBox.isOpened && (
+        {earnedReward && !mysteryBox.isOpened && (
           <RewardCard
             initial={{ y: 50, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
@@ -128,7 +128,7 @@ export const ResultScreen: React.FC<Props> = ({ score, reward, onPlayAgain }) =>
           </RewardCard>
         )}
 
-        {reward && (
+        {earnedReward && (
           <MysteryBox
             mysteryBox={mysteryBox}
             onOpen={handleOpenBox}
